@@ -70,7 +70,7 @@ The function calcNormFactors in EdgeR calculate normalization factors to scale t
 ```
 exp_study = calcNormFactors(exp_study)
 ```
-the function estimateCommonDisp maximizes the negative binomial conditional common likelihood to estimate a common dispersion value across all genes.
+the function estimateCommonDisp maximizes the negative binomial conditional common likelihood (CML) to estimate a common dispersion value across all genes. The CML method involves computing a matrix of quantile-quantile normalized counts, called pseudo-counts. The pseudo-counts are adjusted in such a way that the library sizes are equal for all samples, while preserving differences between groups and variability within each group. The pseudo-counts are included in the output of the function, but are intended mainly for internal edgeR use.
 ```
 exp_study = estimateCommonDisp(exp_study)
 ```
