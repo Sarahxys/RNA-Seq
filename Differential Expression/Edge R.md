@@ -57,11 +57,19 @@ Here we filter the matrix and only retain the row that its row sum is greater th
 ```
 rnaseqMatrix = rnaseqMatrix[rowSums(rnaseqMatrix)>=1,]
 ```
-Here we 
+Here we did two things. We first created a vector that contain "female_liver" 4 times and "male_liver" 4 times, which corresponds to the number number of samples that I have for each condition (female vs male). Then the function factor() is used to convert the vector into factor (categorized vectors). So in this case, "female_liver" will be category 1 and "male_liver" will be category 2 because f comes before m.  In R’s memory, these factors are represented by numbers (1, 2, 3). **I dont fully understand factor but it seems like it is useful in grouping** 
 ```
 conditions = factor(c(rep("female_liver", 4), rep("male_liver", 4)))
 ```
+The function DGEList() creates a DGEList object from a table/matrix of read counts (rows=features, columns=samples), 
+group indicator which is a vector or factor giving the experimental group/condition for each sample/library.
+```
+exp_study = DGEList(counts=rnaseqMatrix, group=conditions)
+```
 
+```
+exp_study = calcNormFactors(exp_study)
+```
 
 
 # EdgeR DE analysis from 
