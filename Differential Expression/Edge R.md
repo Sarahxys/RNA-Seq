@@ -33,6 +33,7 @@ write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE
 
 dev.off()
 ```
+# Broke down of the script
 Load in the R package and set up the session directory on my laptop.
 ```
 library("limma")
@@ -44,7 +45,23 @@ Here I read in the data file that is in the working session directory. There is 
 ```
 data = read.table("borealis_liver.counts.matrix", header=T, sept = "\t",row.names=1, com='')
 ```
+Here a vector is created to store the order of samples. 5-8 is a group and 1-4 is a group, this vector will be useful when we do grouping later
+```
+col_ordering = c(5,6,7,8,1,2,3,4)
+```
+Here we re-order the data frame 'data' using the 'col_ordering' vector. The store the re-ordered data frame into another data frame. 
+```
+rnaseqMatrix = data[,col_ordering]
+```
+Here we filter the matrix and only retain the row that its row sum is greater than 1. Each row contain expression read count for each transcript, if the read count is smaller than 1, the transcript is probably is not a real transcript or is not expressing. 
+```
+rnaseqMatrix = rnaseqMatrix[rowSums(rnaseqMatrix)>=1,]
+```
+Here we 
+```
+conditions = factor(c(rep("female_liver", 4), rep("male_liver", 4)))
+```
 
 
 
-#EdgeR DE analysis from 
+# EdgeR DE analysis from 
