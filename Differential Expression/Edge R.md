@@ -70,6 +70,10 @@ The function calcNormFactors in EdgeR calculate normalization factors to scale t
 ```
 exp_study = calcNormFactors(exp_study)
 ```
+the function estimateCommonDisp maximizes the negative binomial conditional common likelihood to estimate a common dispersion value across all genes.
+```
+exp_study = estimateCommonDisp(exp_study)
+```
 
 
 # EdgeR DE analysis from 
