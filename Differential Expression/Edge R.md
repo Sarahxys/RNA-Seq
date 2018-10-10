@@ -80,6 +80,7 @@ exp_study = calcNormFactors(exp_study)
 ```
 exp_study = estimateCommonDisp(exp_study)
 ```
+**I dont fully understand the why and how of this step** I think this a continuation of the intra-sample normalization. The function estimateTagwiseDisp estimate tagwise negative binomial dispersion values by an empirical Bays method based on weighted conditional maximum likelihood.
 
 
 # EdgeR DE analysis from online tutorial
@@ -98,7 +99,8 @@ exp_study = estimateCommonDisp(exp_study)
     - edgeR use TMM (weighted trimmed mean of m-values) normalization to account for the difference in sequencing depth between samples
     - the output of 
 6. estimate common dispertion
-    - 
+7. estimate empirical Bayes Tagwise dispersion values
+8. 
 
 
 ### Tutorial script
