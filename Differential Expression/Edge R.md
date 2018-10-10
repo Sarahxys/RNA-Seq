@@ -110,6 +110,49 @@ write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE
 ```
 
 # EdgeR DE analysis from online tutorial
+```
+library("limma")
+library("edgeR")
+
+setwd("D:/school_grad school/Project_borealis_sexual_antagonism/documentation/Differential expression/EdgeR DE")
+
+data_raw <- read.table("borealis_liver.counts.matrix", header = TRUE)
+
+cpm_log <- cpm(data_raw, log = TRUE) 
+median_log2_cpm <- apply(cpm_log, 1, median)
+expr_cutoff <- -3
+abline(v = expr_cutoff, col = "red", lwd = 3)
+sum(median_log2_cpm > expr_cutoff)
+data_clean <- data_raw[median_log2_cpm > expr_cutoff, ]#removing all genes with a median log2 cpm below expr_cutoff
+
+#After filtering lowly expressed genes, we recalculate the log2 cpm.
+cpm_log <- cpm(data_clean, log = TRUE)
+heatmap(cor(cpm_log))
+pca <- prcomp(t(cpm_log), scale. = TRUE)
+plot(pca$x[, 1], pca$x[, 2], pch = ".", xlab = "PC1", ylab = "PC2")
+text(pca$x[, 1], pca$x[, 2], labels = colnames(cpm_log))
+summary(pca)
+
+group <- substr(colnames(data_clean), 1, 1)
+group
+y <- DGEList(counts = data_clean, group = group)
+y
+
+y <- calcNormFactors(y)
+y$samples
+
+y <- estimateDisp(y)
+sqrt(y$common.dispersion) # biological coefficient of variation
+plotBCV(y)
+
+et <- exactTest(y)
+results_edgeR <- topTags(et, n = nrow(data_clean), sort.by = "none")
+head(results_edgeR$table)
+
+sum(results_edgeR$table$FDR < .1)
+plotSmear(et, de.tags = rownames(results_edgeR)[results_edgeR$table$FDR < .01])
+abline(h = c(-2, 2), col = "blue")
+```
 
 # Compare the two script
 ### Trinity script
