@@ -66,12 +66,17 @@ group indicator which is a vector or factor giving the experimental group/condit
 ```
 exp_study = DGEList(counts=rnaseqMatrix, group=conditions)
 ```
-The function calcNormFactors in EdgeR calculate normalization factors to scale the raw library sizes. The default method for normalization is TMM, which is the weighted trimmed mean of M-values (to the reference) proposed by Robinson and Oshlack (2010), where the weights are from the delta method on Binomial data. If refColumn is unspecified, the library whose upper quartile is closest to the mean upper quartile is used. If the input object is a DGELIST, the DGELIST, then it is returned as output with the relative normalization factor in object$samples$norm.factors. 
+The function calcNormFactors in EdgeR calculate normalization factors to scale the raw library sizes. This is inter-sample normalization to account for the differnce in library size. The default method for normalization is TMM, which is the weighted trimmed mean of M-values (to the reference) proposed by Robinson and Oshlack (2010), where the weights are from the delta method on Binomial data. If refColumn is unspecified, the library whose upper quartile is closest to the mean upper quartile is used. If the input object is a DGELIST, the DGELIST, then it is returned as output with the relative normalization factor in object$samples$norm.factors. 
   - note: rows that have zero counts for all comuns are trimmed before normalization factors are computed. Therefore rows with a zero counts do not affect the estimated factos. 
 ```
 exp_study = calcNormFactors(exp_study)
 ```
-the function estimateCommonDisp maximizes the negative binomial conditional common likelihood (CML) to estimate a common dispersion value across all genes. The CML method involves computing a matrix of quantile-quantile normalized counts, called pseudo-counts. The pseudo-counts are adjusted in such a way that the library sizes are equal for all samples, while preserving differences between groups and variability within each group. The pseudo-counts are included in the output of the function, but are intended mainly for internal edgeR use.
+**I think this is a intra-sample normalization, normalization between genes of a samples (need to be confirmed).** the function estimateCommonDisp maximizes the negative binomial conditional common likelihood (CML) to estimate a common dispersion value across all genes. The CML method involves computing a matrix of quantile-quantile normalized counts, called pseudo-counts. The pseudo-counts are adjusted in such a way that the library sizes are equal for all samples, while preserving differences between groups and variability within each group. The pseudo-counts are included in the output of the function, but are intended mainly for internal edgeR use.
+  - if the input object is a DEGLIST, the output add the following components to the input DGEList object:
+    - common.dispersion: estimate of the common dispersion
+    - pseudo.counts: numeric matrix of pseudo-counts
+    - pseudo.lib.size: the common library size to which the pseudo-count have been adjusted
+    - AveLogCPM: numeric vector giving log2(AveCPM) for each row of y
 ```
 exp_study = estimateCommonDisp(exp_study)
 ```
