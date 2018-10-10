@@ -23,15 +23,7 @@ exp_study = estimateTagwiseDisp(exp_study)
 et = exactTest(exp_study, pair=c("female_liver", "male_liver"))
 tTags = topTags(et,n=NULL)
 
-head(tTags$table)
-sum(tTags$table$FDR < .1)
-plotSmear(et, de.tags = rownames(tTags)[tTags$table$FDR < .01])
-abline(h = c(-2, 2), col = "blue")
-
-
 write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE_results', sep='	', quote=F, row.names=T)
-
-dev.off()
 ```
 # Broke down of the script
 Load in the R package and set up the session directory on my laptop.
@@ -101,6 +93,21 @@ This is where the comparison actually happend. The function exactTest tests for 
 et = exactTest(exp_study, pair=c("female_liver", "male_liver"))
 
 ```
+This step is to extract the useful information from the differential expression analysis. The function topTags (Table Of The Top Differentially Expressed Tags) extracts the top DE tags in a data frame for a given pair of groups, ranked by p-value or absolute log-fold change.
+  - its default usage is: topTags(object, n=10, adjust.method="BH", sort.by="PValue", p.value=1)
+  - n controls the number of tags to display/return. In the trinity script, the limit of number of tags to display is set to null, meaning no limit was set and all tags were returns or display.
+  - an object of class TopTags containing the following elements for the top n most differentially expressed tags as determined by `sort.by`:
+    - table: a data frame containing the elements 1) logFC, the log-abundance ratio, i.e. fold change, for each tag in the two groups being compared, 2) logCPM, the log-average concentration/abundance for each tag in the two groups being compared, 3) PValue, exact p-value for differential expression using the NB model, 4) FDR, the p-value adjusted for multiple testing as found using p.adjust using the method specified.
+    - adjust.method: character string stating the method used to adjust p-values for multiple testing.
+    - comparison: a vector giving the names of the two groups being compared.
+    - test: character string stating the name of the test.
+```
+tTags = topTags(et,n=NULL)
+```
+Output the result of DE into a tsv file
+```
+write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE_results', sep='	', quote=F, row.names=T)
+```
 
 # EdgeR DE analysis from online tutorial
 
@@ -120,8 +127,8 @@ et = exactTest(exp_study, pair=c("female_liver", "male_liver"))
 6. estimate common dispertion
 7. estimate empirical Bayes Tagwise dispersion values
 8. perform comparison between the two group of values = differential expression between the two condition groups
-9. 
-
+9. extract the useful information from the differential expression analysis
+10. output the DE result
 
 ### Tutorial script
 1. read in the raw read count matrix
