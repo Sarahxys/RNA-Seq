@@ -91,6 +91,16 @@ exp_study = estimateCommonDisp(exp_study)
 exp_study = estimateTagwiseDisp(exp_study)
 
 ```
+This is where the comparison actually happend. The function exactTest tests for differential expression between two groups of count libraries. They implement the exact test proposed by Robinson and Smyth (2008) for a difference in mean between two groups of negative binomial random variables. The functions accept two groups of count libraries, and a test is performed for each row of data. For each row, the test is conditional on the sum of counts for that row. The test can be viewed as a generalization of the well-known exact binomial test (implemented in binomTest) but generalized to overdispersed counts.
+  - exactTest produces an object of class DGEExact containing the following components:
+    - table: data frame containing columns for the log2-fold-change, logFC, the average log2-counts-per-million, logCPM, and the two-sided p-value PValue
+    - comparison: character vector giving the names of the two groups being compared
+    - genes: optional data frame containing annotation for each gene; taken from object
+
+```
+et = exactTest(exp_study, pair=c("female_liver", "male_liver"))
+
+```
 
 # EdgeR DE analysis from online tutorial
 
