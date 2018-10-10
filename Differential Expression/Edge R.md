@@ -76,4 +76,22 @@ exp_study = estimateCommonDisp(exp_study)
 ```
 
 
-# EdgeR DE analysis from 
+# EdgeR DE analysis from online tutorial
+
+# Compare the two script
+### Trinity script
+1. read in the raw read count matrix
+2. re-order the columns based on the orders of sample grouping (female vs male; column 5, 6, 7, 8 have read count for female and column 1, 2,3 4 for male)
+3. filter the matrix: it eleminate rows that have a row sum less than 1, 
+  - have a row sum less than 1 means the total number of raw read for both male and female is less than one.
+  - this could be reasonable since if the total number of supporting read for a transcript is less than 1, it might not be a real transcript. 
+  - meanwhile, it could be un-reasonable since the transcirpt is one of the isoforms of a gene and the gene have a relatively low expression level, the "asigned" or distributed read to that transcript might be less than 1. 
+  - as for now, I would said this a reasonable filter
+4. creating a condition-grouping vector and use the vector to create a DEGList object from the table of raw read counts (rows = gene/transcript id, columns = samples)
+5. calculate the normalizeing factor for between sample normalization
+  - edgeR use TMM normalization to account for the difference in sequencing depth between samples
+6. estimate common dispertion 
+
+
+### Tutorial script
+1. read in the raw read count matrix
