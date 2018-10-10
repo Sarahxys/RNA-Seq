@@ -81,7 +81,16 @@ exp_study = calcNormFactors(exp_study)
 exp_study = estimateCommonDisp(exp_study)
 ```
 **I dont fully understand the why and how of this step** I think this a continuation of the intra-sample normalization. The function estimateTagwiseDisp estimate tagwise negative binomial dispersion values by an empirical Bays method based on weighted conditional maximum likelihood.
+  - The prior values for the dispersions are determined by a global trend. The individual tagwise dispersions are then squeezed towards this trend. The prior degrees of freedom determines the weight given to the prior. The larger the prior degrees of freedom, the more the tagwise dispersions are squeezed towards the global trend. If the number of libraries is large, the prior becomes less important and the tagwise dispersion are determined more by the individual tagwise data.
+  - it returned the following component to the input DGElist object:
+    - prior.df: prior degrees of freedom.
+    - prior.n: estimate of the prior weight.
+    - tagwise.dispersion: numeric vector of the tagwise dispersion estimates.
+    - span: width of the smoothing window, in terms of proportion of the data set.
+```
+exp_study = estimateTagwiseDisp(exp_study)
 
+```
 
 # EdgeR DE analysis from online tutorial
 
