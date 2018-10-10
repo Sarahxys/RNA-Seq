@@ -66,7 +66,8 @@ group indicator which is a vector or factor giving the experimental group/condit
 ```
 exp_study = DGEList(counts=rnaseqMatrix, group=conditions)
 ```
-The function calcNormFactors in EdgeR calculate normalization factors to scale the raw library sizes. The default method for normalization is TMM, which is the weighted trimmed mean of M-values (to the reference) proposed by Robinson and Oshlack (2010), where the weights are from the delta method on Binomial data. If refColumn is unspecified, the library whose upper quartile is closest to the mean upper quartile is used.
+The function calcNormFactors in EdgeR calculate normalization factors to scale the raw library sizes. The default method for normalization is TMM, which is the weighted trimmed mean of M-values (to the reference) proposed by Robinson and Oshlack (2010), where the weights are from the delta method on Binomial data. If refColumn is unspecified, the library whose upper quartile is closest to the mean upper quartile is used. If the input object is a DGELIST, the DGELIST, then it is returned as output with the relative normalization factor in object$samples$norm.factors. 
+  - note: rows that have zero counts for all comuns are trimmed before normalization factors are computed. Therefore rows with a zero counts do not affect the estimated factos. 
 ```
 exp_study = calcNormFactors(exp_study)
 ```
@@ -83,14 +84,16 @@ exp_study = estimateCommonDisp(exp_study)
 1. read in the raw read count matrix
 2. re-order the columns based on the orders of sample grouping (female vs male; column 5, 6, 7, 8 have read count for female and column 1, 2,3 4 for male)
 3. filter the matrix: it eleminate rows that have a row sum less than 1, 
-  - have a row sum less than 1 means the total number of raw read for both male and female is less than one.
-  - this could be reasonable since if the total number of supporting read for a transcript is less than 1, it might not be a real transcript. 
-  - meanwhile, it could be un-reasonable since the transcirpt is one of the isoforms of a gene and the gene have a relatively low expression level, the "asigned" or distributed read to that transcript might be less than 1. 
-  - as for now, I would said this a reasonable filter
+    - have a row sum less than 1 means the total number of raw read for both male and female is less than one.
+    - this could be reasonable since if the total number of supporting read for a transcript is less than 1, it might not be a real transcript. 
+    - meanwhile, it could be un-reasonable since the transcirpt is one of the isoforms of a gene and the gene have a relatively low expression level, the "asigned" or distributed read to that transcript might be less than 1. 
+    - as for now, I would said this a reasonable filter
 4. creating a condition-grouping vector and use the vector to create a DEGList object from the table of raw read counts (rows = gene/transcript id, columns = samples)
 5. calculate the normalizeing factor for between sample normalization
-  - edgeR use TMM normalization to account for the difference in sequencing depth between samples
-6. estimate common dispertion 
+    - edgeR use TMM (weighted trimmed mean of m-values) normalization to account for the difference in sequencing depth between samples
+    - the output of 
+6. estimate common dispertion
+    - 
 
 
 ### Tutorial script
