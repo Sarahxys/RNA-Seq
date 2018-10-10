@@ -119,7 +119,8 @@ et = exactTest(exp_study, pair=c("female_liver", "male_liver"))
     - the output of 
 6. estimate common dispertion
 7. estimate empirical Bayes Tagwise dispersion values
-8. 
+8. perform comparison between the two group of values = differential expression between the two condition groups
+9. 
 
 
 ### Tutorial script
