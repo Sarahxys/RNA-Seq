@@ -133,12 +133,6 @@ write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE
 # EdgeR DE analysis from online tutorial
 This script is from https://gist.github.com/jdblischak/11384914/a4b57e05fd77a3cd1012977662d7b0b31158dc8f 
 ```
-#download edgeR
-#fname <- "http://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE49712&format=file&file=GSE49712_HTSeq.txt.gz"
-#download.file(fname, destfile = "GSE49712_HTSeq.txt.gz")
-#source("http://bioconductor.org/biocLite.R")
-#biocLite("edgeR", dependencies = TRUE)
-
 library("limma")
 library("edgeR")
 
