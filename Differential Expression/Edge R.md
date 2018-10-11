@@ -25,6 +25,24 @@ tTags = topTags(et,n=NULL)
 
 write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE_results', sep='	', quote=F, row.names=T)
 ```
+Below is the step involved in this script:
+1. read in the raw read count matrix
+2. re-order the columns based on the orders of sample grouping (female vs male; column 5, 6, 7, 8 have read count for female and column 1, 2,3 4 for male)
+3. filter the matrix: it eleminate rows that have a row sum less than 1, 
+    - have a row sum less than 1 means the total number of raw read for both male and female is less than one.
+    - this could be reasonable since if the total number of supporting read for a transcript is less than 1, it might not be a real transcript. 
+    - meanwhile, it could be un-reasonable since the transcirpt is one of the isoforms of a gene and the gene have a relatively low expression level, the "asigned" or distributed read to that transcript might be less than 1. 
+    - as for now, I would said this a reasonable filter
+4. creating a condition-grouping vector and use the vector to create a DEGList object from the table of raw read counts (rows = gene/transcript id, columns = samples)
+5. calculate the normalizeing factor for between sample normalization
+    - edgeR use TMM (weighted trimmed mean of m-values) normalization to account for the difference in sequencing depth between samples
+    - the output of 
+6. estimate common dispertion
+7. estimate empirical Bayes Tagwise dispersion values
+8. perform comparison between the two group of values = differential expression between the two condition groups
+9. extract the useful information from the differential expression analysis
+10. output the DE result
+
 ## Broke down of the script
 Load in the R package and set up the session directory on my laptop.
 ```
@@ -45,9 +63,12 @@ Here we re-order the data frame 'data' using the 'col_ordering' vector. The stor
 ```
 rnaseqMatrix = data[,col_ordering]
 ```
-Here we filter the matrix and only retain the row that its row sum is greater than 1. Each row contain expression read count for each transcript, if the read count is smaller than 1, the transcript is probably is not a real transcript or is not expressing. 
+Here we do some basic filtering before normalization. Trinity v2 edgeR script filters the matrix and only retain the row that its row sum is greater than 1. Each row contain expression read count for each transcript, if the read count is smaller than 1, the transcript is probably is not a real transcript or is not expressing. Trinity v4 edgeR script filters the matrix and only retain the row that its cpm-normalized count greater than 1 and the row sum of cmp-normalized count greater than 2. 
 ```
+#v2
 rnaseqMatrix = rnaseqMatrix[rowSums(rnaseqMatrix)>=1,]
+#v4
+rnaseqMatrix = rnaseqMatrix[rowSums(cpm(rnaseqMatrix) > 1) >= 2,]
 ```
 Here we did two things. We first created a vector that contain "female_liver" 4 times and "male_liver" 4 times, which corresponds to the number number of samples that I have for each condition (female vs male). Then the function factor() is used to convert the vector into factor (categorized vectors). So in this case, "female_liver" will be category 1 and "male_liver" will be category 2 because f comes before m.  In R’s memory, these factors are represented by numbers (1, 2, 3). **I dont fully understand factor but it seems like it is useful in grouping** 
 ```
@@ -112,6 +133,12 @@ write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE
 # EdgeR DE analysis from online tutorial
 This script is from https://gist.github.com/jdblischak/11384914/a4b57e05fd77a3cd1012977662d7b0b31158dc8f 
 ```
+#download edgeR
+#fname <- "http://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE49712&format=file&file=GSE49712_HTSeq.txt.gz"
+#download.file(fname, destfile = "GSE49712_HTSeq.txt.gz")
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("edgeR", dependencies = TRUE)
+
 library("limma")
 library("edgeR")
 
@@ -122,37 +149,15 @@ data_raw <- read.table("borealis_liver.counts.matrix", header = TRUE)
 cpm_log <- cpm(data_raw, log = TRUE) 
 median_log2_cpm <- apply(cpm_log, 1, median)
 expr_cutoff <- -3
-abline(v = expr_cutoff, col = "red", lwd = 3)
-sum(median_log2_cpm > expr_cutoff)
-data_clean <- data_raw[median_log2_cpm > expr_cutoff, ]#removing all genes with a median log2 cpm below expr_cutoff
-
-#After filtering lowly expressed genes, we recalculate the log2 cpm.
-cpm_log <- cpm(data_clean, log = TRUE)
-heatmap(cor(cpm_log))
-pca <- prcomp(t(cpm_log), scale. = TRUE)
-plot(pca$x[, 1], pca$x[, 2], pch = ".", xlab = "PC1", ylab = "PC2")
-text(pca$x[, 1], pca$x[, 2], labels = colnames(cpm_log))
-summary(pca)
+data_clean <- data_raw[median_log2_cpm > expr_cutoff, ]
 
 group <- substr(colnames(data_clean), 1, 1)
-group
 y <- DGEList(counts = data_clean, group = group)
-y
-
 y <- calcNormFactors(y)
-y$samples
-
 y <- estimateDisp(y)
-sqrt(y$common.dispersion) # biological coefficient of variation
-plotBCV(y)
-
 et <- exactTest(y)
 results_edgeR <- topTags(et, n = nrow(data_clean), sort.by = "none")
-head(results_edgeR$table)
 
-sum(results_edgeR$table$FDR < .1)
-plotSmear(et, de.tags = rownames(results_edgeR)[results_edgeR$table$FDR < .01])
-abline(h = c(-2, 2), col = "blue")
 ```
 ## Broke down of the script
 Load in the R package and set up the session directory on my laptop.
@@ -161,8 +166,6 @@ library("limma")
 library("edgeR")
 
 setwd("D:/school_grad school/Project_borealis_sexual_antagonism/documentation/Differential expression/EdgeR DE")
-
-
 ```
 Here I read in the data file that is in the working session directory. There is a header so `header = T`. The first row is the transcript ID so I set the first row to be the row.name 
 ```
@@ -173,30 +176,37 @@ We should also remove genes that are unexpressed or very lowly expressed in the 
 cpm_log <- cpm(data_raw, log = TRUE) 
 median_log2_cpm <- apply(cpm_log, 1, median)
 expr_cutoff <- -3
-abline(v = expr_cutoff, col = "red", lwd = 3)
-sum(median_log2_cpm > expr_cutoff)
 data_clean <- data_raw[median_log2_cpm > expr_cutoff, ]#removing all genes with a median log2 cpm below expr_cutoff
+```
+Do normalization like what the Trinity edgeR script did. Inter sample normalization with `calNormFactors`, intra-sample normalization with `estimateDisp` , then do DE with `exactTest`, and finally extract result using `topTags`. 
+```
+group <- substr(colnames(data_clean), 1, 1)
+y <- DGEList(counts = data_clean, group = group)
+y <- calcNormFactors(y)
+y <- estimateDisp(y)
+et <- exactTest(y)
+results_edgeR <- topTags(et, n = nrow(data_clean), sort.by = "none")
 ```
 
 
-# Compare the two script
-### Trinity script
-1. read in the raw read count matrix
-2. re-order the columns based on the orders of sample grouping (female vs male; column 5, 6, 7, 8 have read count for female and column 1, 2,3 4 for male)
-3. filter the matrix: it eleminate rows that have a row sum less than 1, 
-    - have a row sum less than 1 means the total number of raw read for both male and female is less than one.
-    - this could be reasonable since if the total number of supporting read for a transcript is less than 1, it might not be a real transcript. 
-    - meanwhile, it could be un-reasonable since the transcirpt is one of the isoforms of a gene and the gene have a relatively low expression level, the "asigned" or distributed read to that transcript might be less than 1. 
-    - as for now, I would said this a reasonable filter
-4. creating a condition-grouping vector and use the vector to create a DEGList object from the table of raw read counts (rows = gene/transcript id, columns = samples)
-5. calculate the normalizeing factor for between sample normalization
-    - edgeR use TMM (weighted trimmed mean of m-values) normalization to account for the difference in sequencing depth between samples
-    - the output of 
-6. estimate common dispertion
-7. estimate empirical Bayes Tagwise dispersion values
-8. perform comparison between the two group of values = differential expression between the two condition groups
-9. extract the useful information from the differential expression analysis
-10. output the DE result
+# General pipeline of edgeR DE 
+After comparing the two example script, below is the general pipeline that I conclude: 
 
-### Tutorial script
 1. read in the raw read count matrix
+2. process/filter data before normalization
+  - filter the matrix: 
+    - Trinity script v2: row sum of raw count greater than 1
+    - Trinity script v4: cpm normalized count greater than 1; then row sum of cmp normalized count greater than 2. 
+    - Tutorial 1 script: 
+  
+3. re-order the columns based on the orders of sample grouping
+    - creating a condition-grouping vector and use the vector to create a DEGList object from the table of raw read counts (rows = gene/transcript id, columns = samples)
+5. Normalization
+    - inter-sample normalization: calculate the normalizeing factor for between sample normalization
+      - edgeR use TMM (weighted trimmed mean of m-values) normalization to account for the difference in sequencing depth between samples
+    - intra-sample normalization: estimate common dispertion and estimate empirical Bayes Tagwise dispersion values
+6. perform comparison between the two group of values = differential expression between the two condition groups
+7. extract the useful information from the differential expression analysis
+8. output the DE result
+
+
