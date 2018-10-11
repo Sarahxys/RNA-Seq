@@ -130,7 +130,7 @@ Output the result of DE into a tsv file
 write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE_results', sep='	', quote=F, row.names=T)
 ```
 
-# EdgeR DE analysis from online tutorial
+# EdgeR DE analysis from online tutorial 1
 This script is from https://gist.github.com/jdblischak/11384914/a4b57e05fd77a3cd1012977662d7b0b31158dc8f 
 ```
 library("limma")
@@ -181,26 +181,58 @@ y <- estimateDisp(y)
 et <- exactTest(y)
 results_edgeR <- topTags(et, n = nrow(data_clean), sort.by = "none")
 ```
+# EdgeR DE analysis from online tutorial 2
+This script is from http://www.nathalievialaneix.eu/doc/html/solution_edgeR-tomato-withcode.html
+```
+rawCountTable <- read.table("countData.txt", header=TRUE, sep="\t", row.names=1)
+sampleInfo <- read.table("design.csv", header=TRUE, sep=",", row.names=1)
 
+dgeFull <- DGEList(rawCountTable, group=sampleInfo$condition)
+
+#remove genes with zero counts for all samples
+dgeFull <- DGEList(dgeFull$counts[apply(dgeFull$counts, 1, sum) != 0, ],
+                   group=dgeFull$samples$group)
+#normalization
+dgeFull <- calcNormFactors(dgeFull, method="TMM")
+dgeFull <- estimateCommonDisp(dgeFull)
+dgeFull <- estimateTagwiseDisp(dgeFull)
+dgeTest <- exactTest(dgeFull)
+resNoFilt <- topTags(dgeTest, n=nrow(dgeTest$table))
+sum(resNoFilt$table$FDR < 0.01)
+
+#extract and sort differentially expressed genes
+sigDownReg <- resNoFilt$table[resNoFilt$table$FDR<0.01,]
+sigDownReg <- sigDownReg[order(sigDownReg$logFC),]
+sigUpReg <- sigDownReg[order(sigDownReg$logFC, decreasing=TRUE),]
+write.csv(sigDownReg, file="sigDownReg_tomato.csv")
+write.csv(sigUpReg, file="sigUpReg_tomato.csv")
+
+#create a MA plot with 1% differentially expressed genes
+plotSmear(dgeTestFilt,
+          de.tags = rownames(resFilt$table)[which(resFilt$table$FDR<0.01)])
+```
 
 # General pipeline of edgeR DE 
-After comparing the two example script, below is the general pipeline that I conclude: 
+After comparing the example scripts, below is the general pipeline that I conclude: 
 
-1. read in the raw read count matrix
-2. process/filter data before normalization
+1. Read in the raw read count matrix
+2. Filter data before normalization
   - filter the matrix: 
     - Trinity script v2: row sum of raw count greater than 1
     - Trinity script v4: cpm normalized count greater than 1; then row sum of cmp normalized count greater than 2. 
-    - Tutorial 1 script: 
+    - Tutorial 1 script: calculate cpm_log and find the median cpm_log for each row; the median cpm_log need to be greater than a set cutoff
+    - Tutorial 2 script: remove genes with zero counts for all samples
   
-3. re-order the columns based on the orders of sample grouping
+3.  Grouping based on experimental condition
+    - re-order the columns based on the orders of sample grouping
     - creating a condition-grouping vector and use the vector to create a DEGList object from the table of raw read counts (rows = gene/transcript id, columns = samples)
-5. Normalization
+4. Normalization
     - inter-sample normalization: calculate the normalizeing factor for between sample normalization
       - edgeR use TMM (weighted trimmed mean of m-values) normalization to account for the difference in sequencing depth between samples
     - intra-sample normalization: estimate common dispertion and estimate empirical Bayes Tagwise dispersion values
-6. perform comparison between the two group of values = differential expression between the two condition groups
-7. extract the useful information from the differential expression analysis
-8. output the DE result
+5. Differential expression
+    - cperform comparison between the two group of values = differential expression between the two condition groups
+6. Extract the useful information from the differential expression analysis
+7. Output the DE result
 
 
