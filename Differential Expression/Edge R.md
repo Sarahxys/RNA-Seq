@@ -1,7 +1,7 @@
 # Differential expression usign EdgeR
 I start learning EdgeR through looking at other's script.
 
-# EdgeR DE analysis from Trinity
+## EdgeR DE analysis from Trinity
 Below is the whole script. I broke down the script line by line to learn. 
 ```
 library("limma")
@@ -43,7 +43,7 @@ Below is the step involved in this script:
 9. extract the useful information from the differential expression analysis
 10. output the DE result
 
-## Broke down of the script
+#### Broke down of the script
 Load in the R package and set up the session directory on my laptop.
 ```
 library("limma")
@@ -130,7 +130,7 @@ Output the result of DE into a tsv file
 write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE_results', sep='	', quote=F, row.names=T)
 ```
 
-# EdgeR DE analysis from online tutorial 1
+## EdgeR DE analysis from online tutorial 1
 This script is from https://gist.github.com/jdblischak/11384914/a4b57e05fd77a3cd1012977662d7b0b31158dc8f 
 ```
 library("limma")
@@ -153,7 +153,7 @@ et <- exactTest(y)
 results_edgeR <- topTags(et, n = nrow(data_clean), sort.by = "none")
 
 ```
-## Broke down of the script
+#### Broke down of the script
 Load in the R package and set up the session directory on my laptop.
 ```
 library("limma")
@@ -181,7 +181,7 @@ y <- estimateDisp(y)
 et <- exactTest(y)
 results_edgeR <- topTags(et, n = nrow(data_clean), sort.by = "none")
 ```
-# EdgeR DE analysis from online tutorial 2
+## EdgeR DE analysis from online tutorial 2
 This script is from http://www.nathalievialaneix.eu/doc/html/solution_edgeR-tomato-withcode.html
 ```
 rawCountTable <- read.table("countData.txt", header=TRUE, sep="\t", row.names=1)
@@ -212,7 +212,7 @@ plotSmear(dgeTestFilt,
           de.tags = rownames(resFilt$table)[which(resFilt$table$FDR<0.01)])
 ```
 
-# General pipeline of edgeR DE 
+## General pipeline of edgeR DE 
 After comparing the example scripts, below is the general pipeline that I conclude: 
 
 1. Read in the raw read count matrix
