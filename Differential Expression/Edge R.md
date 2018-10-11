@@ -25,7 +25,7 @@ tTags = topTags(et,n=NULL)
 
 write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE_results', sep='	', quote=F, row.names=T)
 ```
-# Broke down of the script
+## Broke down of the script
 Load in the R package and set up the session directory on my laptop.
 ```
 library("limma")
@@ -110,6 +110,7 @@ write.table(tTags, file='liver.counts.matrix.female_liver_vs_male_liver.edgeR.DE
 ```
 
 # EdgeR DE analysis from online tutorial
+This script is from https://gist.github.com/jdblischak/11384914/a4b57e05fd77a3cd1012977662d7b0b31158dc8f 
 ```
 library("limma")
 library("edgeR")
@@ -153,6 +154,30 @@ sum(results_edgeR$table$FDR < .1)
 plotSmear(et, de.tags = rownames(results_edgeR)[results_edgeR$table$FDR < .01])
 abline(h = c(-2, 2), col = "blue")
 ```
+## Broke down of the script
+Load in the R package and set up the session directory on my laptop.
+```
+library("limma")
+library("edgeR")
+
+setwd("D:/school_grad school/Project_borealis_sexual_antagonism/documentation/Differential expression/EdgeR DE")
+
+
+```
+Here I read in the data file that is in the working session directory. There is a header so `header = T`. The first row is the transcript ID so I set the first row to be the row.name 
+```
+data_raw <- read.table("borealis_liver.counts.matrix", header = TRUE)
+```
+We should also remove genes that are unexpressed or very lowly expressed in the samples. One simple method to do this is to choose a cutoff based on the median log2-transformed counts per gene per million mapped reads (cpm). edgeR provides the function, cpm, to compute the counts per million.
+```
+cpm_log <- cpm(data_raw, log = TRUE) 
+median_log2_cpm <- apply(cpm_log, 1, median)
+expr_cutoff <- -3
+abline(v = expr_cutoff, col = "red", lwd = 3)
+sum(median_log2_cpm > expr_cutoff)
+data_clean <- data_raw[median_log2_cpm > expr_cutoff, ]#removing all genes with a median log2 cpm below expr_cutoff
+```
+
 
 # Compare the two script
 ### Trinity script
