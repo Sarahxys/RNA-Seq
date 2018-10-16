@@ -119,6 +119,7 @@ This step is to extract the useful information from the differential expression 
   - n controls the number of tags to display/return. In the trinity script, the limit of number of tags to display is set to null, meaning no limit was set and all tags were returns or display.
   - an object of class TopTags containing the following elements for the top n most differentially expressed tags as determined by `sort.by`:
     - table: a data frame containing the elements 1) logFC, the log-abundance ratio, i.e. fold change, for each tag in the two groups being compared, 2) logCPM, the log-average concentration/abundance for each tag in the two groups being compared, 3) PValue, exact p-value for differential expression using the NB model, 4) FDR, the p-value adjusted for multiple testing as found using p.adjust using the method specified.
+        - How logFC is calculated in EdgeR package? logFC <- drop((glmfit$coefficients %*% contrast)/log(2))
     - adjust.method: character string stating the method used to adjust p-values for multiple testing.
     - comparison: a vector giving the names of the two groups being compared.
     - test: character string stating the name of the test.
