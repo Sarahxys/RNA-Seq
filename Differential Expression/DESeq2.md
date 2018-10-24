@@ -4,7 +4,7 @@
 library(edgeR)
 library(DESeq2)
 
-data = read.table("/home/xue/borealis_transcriptome/borealis_denovo_transcriptome_august2017/sum_expression/borealis_collapsedT_DE/borealis_expression_per
+data = read.table("/home/xue/borealis_transcriptome/borealis_denovo_transcriptome_august2017/sum_expression/borealis_collapsedT_DE/borealis_expression_per")
 col_ordering = c(1,2,3,4,5,6,7,8)
 rnaseqMatrix = data[,col_ordering]
 #rnaseqMatrix = round(rnaseqMatrix)
